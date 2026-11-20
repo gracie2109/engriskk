@@ -1,0 +1,598 @@
+<title>Lộ trình 90 ngày</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: app shell. Phone: top bar + bottom tab bar. Desktop: top bar with inline tabs. Dashboard first, one daily checklist as the core loop. */
+:root{
+  --bg:#f3f6f8; --surface:#ffffff; --surface2:#ebf0f4; --fg:#0e1a23; --muted:#566775; --line:#dbe3e9;
+  --accent:#0a8f7d; --accent-fg:#ffffff; --accent-soft:#d8f1ec; --hot:#c76a00; --hot-soft:#fdeacf;
+  --warn:#9a5a00; --warn-soft:#fdf0d8; --bad:#b3261e; --shadow:0 1px 2px rgba(14,26,35,.06),0 6px 20px rgba(14,26,35,.06);
+  --font:'Be Vietnam Pro',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0a1117; --surface:#121c25; --surface2:#1a2733; --fg:#e8eef3; --muted:#8fa1af; --line:#223341;
+  --accent:#36d1b8; --accent-fg:#04201b; --accent-soft:#103a33; --hot:#f5a623; --hot-soft:#3a2a10;
+  --warn:#f0b35a; --warn-soft:#3a2a10; --bad:#ff8a80; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a1117; --surface:#121c25; --surface2:#1a2733; --fg:#e8eef3; --muted:#8fa1af; --line:#223341;
+  --accent:#36d1b8; --accent-fg:#04201b; --accent-soft:#103a33; --hot:#f5a623; --hot-soft:#3a2a10;
+  --warn:#f0b35a; --warn-soft:#3a2a10; --bad:#ff8a80; --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35); color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--font);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 calc(84px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+.wrap{max-width:1000px;margin:0 auto}
+h1,h2,h3{line-height:1.25;text-wrap:balance;margin:0}
+h2{font-size:1.3rem;font-weight:700;margin-bottom:12px;letter-spacing:-.01em}
+h3{font-size:1.02rem;font-weight:600;margin:20px 0 8px}
+p{margin:0 0 10px;max-width:68ch}
+a{color:var(--accent)}
+.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:34px;height:34px;border-radius:10px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;font-weight:800;font-family:var(--mono);flex:none;font-size:.82rem}
+.brand b{display:block;font-size:1rem;line-height:1.15;letter-spacing:-.01em}
+.brand small{display:block;color:var(--muted);font-size:.74rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconbtn{width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--fg);display:grid;place-items:center;cursor:pointer;flex:none;padding:0}
+.iconbtn svg{width:20px;height:20px}
+/* nav */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:25;background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;justify-content:space-around;padding:6px max(8px,env(safe-area-inset-left,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-right,0px))}
+nav a{flex:1;min-width:0;text-decoration:none;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;font-size:.68rem;font-weight:600;padding:6px 2px;border-radius:12px;transition:color .15s,background .15s}
+nav a svg{width:22px;height:22px}
+nav a[aria-current="page"]{color:var(--accent);background:var(--accent-soft)}
+@media (min-width:860px){
+  body{padding-block:0 56px}
+  nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 64px);bottom:auto;border:1px solid var(--line);border-radius:14px;justify-content:flex-start;gap:4px;padding:5px;margin-bottom:22px;max-width:1000px;margin-inline:auto;background:var(--surface)}
+  nav a{flex:none;flex-direction:row;gap:8px;font-size:.88rem;padding:8px 14px}
+  nav a svg{width:18px;height:18px}
+}
+a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.view{display:none}
+.view.on{display:block;animation:rise .35s cubic-bezier(.2,.7,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* components */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.card.lift{box-shadow:var(--shadow)}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.grid>*{min-width:0}
+.stack{display:grid;gap:14px}
+.tag{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.plain{background:var(--surface2);color:var(--muted)}
+.note{background:var(--warn-soft);border:1px solid color-mix(in srgb,var(--warn) 50%,transparent);border-radius:12px;padding:12px 14px;margin:12px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+button,select,input[type=number]{font:inherit;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 14px}
+button{cursor:pointer;font-weight:600;transition:transform .1s,background .15s}
+button:active{transform:scale(.97)}
+.btn{display:inline-block;text-decoration:none;font-weight:600;color:var(--fg);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 14px}
+.btn.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+button.pri{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+tr.sun td{background:var(--accent-soft)}
+tr.cur td{box-shadow:inset 0 0 0 2px var(--accent)}
+tr.done td{color:var(--muted)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.chips button,.chips a{padding:7px 13px;font-size:.84rem;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--fg);text-decoration:none;font-weight:600;cursor:pointer}
+.chips button[aria-pressed="true"],.chips a[aria-current="page"]{background:var(--accent);color:var(--accent-fg);border-color:var(--accent)}
+.ex{margin:0;padding:0;list-style:none;counter-reset:q}
+.ex li{counter-increment:q;padding:10px 0;border-top:1px solid var(--line);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ex li::before{content:counter(q) ".";font-family:var(--mono);color:var(--muted);width:2ch}
+.ex input[type=text]{font:inherit;border:0;border-bottom:2px solid var(--line);background:transparent;color:var(--fg);width:7ch;text-align:center;padding:2px}
+.ex .ok{color:var(--accent);font-weight:600}.ex .no{color:var(--bad);font-weight:600}
+dl.words{display:grid;grid-template-columns:max-content 1fr;gap:6px 16px;margin:0}
+dl.words dt{font-family:var(--mono);font-weight:600}
+dl.words dd{margin:0;color:var(--muted);min-width:0}
+.say{border-left:3px solid var(--accent);padding:4px 0 4px 14px;margin:10px 0;font-size:1.02rem}
+.say small{display:block;color:var(--muted);font-size:.85rem}
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font:11px var(--mono)}
+.stat{font-family:var(--mono);font-size:1.6rem;font-weight:600}
+.cols{columns:2 260px;column-gap:28px}.cols>*{break-inside:avoid}
+ul.tight,ol.tight{margin:0 0 10px;padding-left:20px}ul.tight li,ol.tight li{margin:3px 0}
+/* dashboard */
+.hero{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+@media (max-width:520px){.hero{grid-template-columns:1fr;justify-items:center;text-align:center}.hero .row{justify-content:center}}
+.ring{position:relative;width:132px;height:132px;flex:none}
+.ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:11;stroke-linecap:round}
+.ring .bg{stroke:var(--surface2)}
+.ring .fg{stroke:var(--accent);transition:stroke-dashoffset .9s cubic-bezier(.2,.7,.2,1)}
+.ring div{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.ring b{font-family:var(--mono);font-size:1.7rem;line-height:1}
+.ring span{font-size:.72rem;color:var(--muted)}
+.stats{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
+.stats>div{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.stats small{display:block;color:var(--muted);font-size:.74rem;font-weight:600}
+.stats b{font-family:var(--mono);font-size:1.3rem}
+.stats .hot b{color:var(--hot)}
+.heat{display:grid;grid-template-columns:repeat(13,1fr);grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:4px}
+.heat i{aspect-ratio:1;border-radius:4px;background:var(--surface2);display:block;position:relative}
+.heat i[data-l="1"]{background:color-mix(in srgb,var(--accent) 30%,var(--surface2))}
+.heat i[data-l="2"]{background:color-mix(in srgb,var(--accent) 60%,var(--surface2))}
+.heat i[data-l="3"]{background:var(--accent)}
+.heat i.today{outline:2px solid var(--fg);outline-offset:1px}
+.heat i.mock::after{content:"";position:absolute;inset:auto 2px 2px auto;width:5px;height:5px;border-radius:50%;background:var(--hot)}
+.heat i.pad{background:transparent}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.76rem;color:var(--muted);margin-top:10px;align-items:center}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;vertical-align:-1px;margin-right:4px;background:var(--surface2)}
+.phases{display:flex;height:12px;border-radius:99px;overflow:hidden;gap:3px;position:relative}
+.phases span{background:var(--surface2);position:relative;overflow:hidden}
+.phases span b{position:absolute;inset:0 auto 0 0;background:var(--accent);width:0;transition:width .8s}
+.phase-l{display:flex;gap:3px;font-size:.72rem;color:var(--muted);margin-top:6px}
+.phase-l div{min-width:0}
+/* today */
+.task{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:13px 0;border-top:1px solid var(--line)}
+.task:first-child{border-top:0}
+.task input{appearance:none;-webkit-appearance:none;width:26px;height:26px;border-radius:8px;border:2px solid var(--line);background:var(--surface);display:grid;place-content:center;cursor:pointer;margin:0;transition:background .15s,border-color .15s,transform .15s}
+.task input::after{content:"";width:12px;height:7px;border:solid var(--accent-fg);border-width:0 0 3px 3px;transform:rotate(-45deg) scale(0);margin-top:-3px;transition:transform .15s}
+.task input:checked{background:var(--accent);border-color:var(--accent);transform:scale(1.05)}
+.task input:checked::after{transform:rotate(-45deg) scale(1)}
+.task label{min-width:0;cursor:pointer}
+.task b{display:block;font-weight:600}
+.task small{color:var(--muted);font-size:.82rem}
+.task.done b{color:var(--muted);text-decoration:line-through}
+.task .tm{font-family:var(--mono);font-size:.8rem;padding:6px 10px;border-radius:99px;background:var(--surface2);border:0;color:var(--fg)}
+.task .tm.run{background:var(--hot-soft);color:var(--hot)}
+.bar{height:8px;background:var(--surface2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);width:0;transition:width .5s}
+.daynav{display:flex;gap:6px}
+.next-up{display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+</style>
+
+<div class="wrap">
+<div class="top">
+  <div class="brand"><div class="logo">90</div><div style="min-width:0"><b>Lộ trình 90 ngày</b><small>TOEIC 250-300 → 500 · giao tiếp cho dev</small></div></div>
+  <button class="iconbtn" id="theme" aria-label="Đổi giao diện sáng/tối"></button>
+</div>
+<nav id="nav" aria-label="Điều hướng chính"></nav>
+
+<!-- TỔNG QUAN -->
+<section class="view" id="v-tong-quan">
+  <div class="card lift hero">
+    <div class="ring"><svg viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="52"/><circle class="fg" id="ring-fg" cx="60" cy="60" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"/></svg><div><b id="ring-n">0</b><span>/ 90 ngày</span></div></div>
+    <div>
+      <span class="tag" id="phase-tag">Giai đoạn 1</span>
+      <h2 id="hero-title" style="margin:8px 0 6px;font-size:1.45rem"></h2>
+      <p class="muted" id="hero-sub" style="margin-bottom:12px"></p>
+      <div class="row"><a class="btn pri" id="cta" href="#hom-nay">Học hôm nay</a><a class="btn" href="#hoc-ngay-1">Xem bài Ngày 1</a></div>
+    </div>
+  </div>
+  <div class="stats" style="margin-top:14px" id="stats"></div>
+  <div class="card" style="margin-top:14px">
+    <div class="row between" style="margin-bottom:12px"><b>90 ngày học</b><span class="muted" style="font-size:.8rem">mỗi cột là một tuần</span></div>
+    <div class="heat" id="heat" role="img" aria-label="Lưới 90 ngày học, màu đậm hơn là hoàn thành nhiều hơn"></div>
+    <div class="legend"><span><i></i>chưa học</span><span><i style="background:color-mix(in srgb,var(--accent) 30%,var(--surface2))"></i>một phần</span><span><i style="background:var(--accent)"></i>đủ</span><span><i style="background:var(--hot);border-radius:50%;width:8px;height:8px"></i>thi thử</span></div>
+  </div>
+  <div class="grid" style="margin-top:14px">
+    <div class="card"><b>3 giai đoạn</b>
+      <div class="phases" style="margin-top:12px" id="phases"><span style="flex:4"><b></b></span><span style="flex:5"><b></b></span><span style="flex:4"><b></b></span></div>
+      <div class="phase-l"><div style="flex:4">Nền tảng</div><div style="flex:5">Làm quen TOEIC</div><div style="flex:4">Luyện đề</div></div>
+    </div>
+    <div class="card" id="mock-card"></div>
+  </div>
+</section>
+
+<!-- HÔM NAY -->
+<section class="view" id="v-hom-nay">
+  <div class="note" id="prestart" hidden></div>
+  <div class="row between" style="margin-bottom:12px">
+    <div><span class="tag" id="d-tag"></span><h2 id="today-title" style="margin:6px 0 0"></h2></div>
+    <div class="daynav"><button class="iconbtn" id="prev" aria-label="Ngày trước">‹</button><button class="iconbtn" id="next" aria-label="Ngày sau">›</button><button id="goto-today">Hôm nay</button></div>
+  </div>
+  <div class="grid">
+    <div class="card lift">
+      <div class="row between" style="margin-bottom:6px"><b id="prog-label"></b><span class="tag warn" id="lite-tag" hidden>Bản 60 phút</span></div>
+      <div class="bar" style="margin-bottom:6px"><i id="day-bar"></i></div>
+      <div id="tasks"></div>
+    </div>
+    <div class="stack" style="align-content:start">
+      <div class="card" id="today-detail"></div>
+      <div class="card">
+        <b>Ngày mệt?</b>
+        <p class="muted" style="margin:6px 0 10px;font-size:.9rem">Chọn bản 60 phút: Anki 20' + nghe 25' + nói 15'. Không bỏ hẳn ngày nào.</p>
+        <button id="lite"></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LỊCH -->
+<section class="view" id="v-lich">
+  <h2>Lịch học 90 ngày</h2>
+  <p class="muted">Mỗi ngày thêm cố định: Anki 30 phút và sổ lỗi 10 phút. Chủ Nhật là ôn tuần hoặc thi thử. Tuần 11-12 trùng Tết Âm lịch (Mùng 1 là 06/02/2027) nên có ngày học bản nhẹ.</p>
+  <div class="chips" id="weeks"></div>
+  <div class="scroll"><table><thead><tr><th>Ngày</th><th>Thứ</th><th>Ngữ pháp / chủ điểm</th><th>Nghe</th><th>Đọc</th><th>Nói</th></tr></thead><tbody id="sched"></tbody></table></div>
+</section>
+
+<!-- HỌC -->
+<section class="view" id="v-hoc">
+  <div class="chips" id="hoc-tabs">
+    <a href="#hoc-ngay-1">Bài Ngày 1</a><a href="#hoc-chien-luoc">Chiến lược</a><a href="#hoc-ngu-phap">Ngữ pháp</a><a href="#hoc-noi-tu-vung">Nói + từ vựng</a><a href="#hoc-toeic">TOEIC Part 1-7</a>
+  </div>
+  <div class="panel" id="p-ngay-1">
+  <h2>Bài học Ngày 1: Tự giới thiệu với "to be"</h2>
+  <p class="muted">Thứ Hai 23/11/2026 · 3 giờ · Mục tiêu: nói được 5 câu giới thiệu bản thân và nhớ 15 từ đầu tiên.</p>
+  <div class="grid">
+    <div class="card">
+      <span class="tag">Ngữ pháp · 40 phút</span>
+      <h3>To be: am / is / are</h3>
+      <p><b>Tiếng Việt "là / ở / thì" = to be.</b> Câu tiếng Anh luôn cần một động từ; với danh từ, tính từ hoặc nơi chốn, động từ đó là <i>to be</i>.</p>
+      <table><thead><tr><th>Chủ ngữ</th><th>to be</th><th>Ví dụ</th></tr></thead><tbody>
+      <tr><td>I</td><td class="mono">am</td><td>I am a developer.</td></tr>
+      <tr><td>He / She / It</td><td class="mono">is</td><td>She is my manager.</td></tr>
+      <tr><td>You / We / They</td><td class="mono">are</td><td>We are a small team.</td></tr></tbody></table>
+      <p style="margin-top:10px"><b>Phủ định:</b> thêm <span class="mono">not</span>: I am not tired. He is not (isn't) here.<br><b>Câu hỏi:</b> đảo to be lên đầu: Are you busy? Is the build ready?</p>
+      <p class="muted">Rút gọn khi nói: I'm, you're, he's, she's, it's, we're, they're.</p>
+    </div>
+    <div class="card">
+      <span class="tag">Từ vựng · 30 phút</span>
+      <h3>15 từ đầu tiên (thêm vào Anki)</h3>
+      <dl class="words">
+        <dt>developer</dt><dd>lập trình viên</dd><dt>company</dt><dd>công ty</dd><dt>team</dt><dd>nhóm</dd>
+        <dt>manager</dt><dd>quản lý</dd><dt>customer</dt><dd>khách hàng</dd><dt>office</dt><dd>văn phòng</dd>
+        <dt>meeting</dt><dd>cuộc họp</dd><dt>project</dt><dd>dự án</dd><dt>task</dt><dd>nhiệm vụ</dd>
+        <dt>deadline</dt><dd>hạn chót</dd><dt>bug</dt><dd>lỗi phần mềm</dd><dt>report</dt><dd>báo cáo</dd>
+        <dt>email</dt><dd>thư điện tử</dd><dt>schedule</dt><dd>lịch trình</dd><dt>busy</dt><dd>bận</dd>
+      </dl>
+      <p class="muted" style="margin-top:10px">Mỗi thẻ Anki: mặt trước là từ tiếng Anh, mặt sau là nghĩa + 1 câu ví dụ của riêng bạn. Nghe phát âm trên từ điển trước khi lưu.</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <h3 style="margin-top:0">Bài tập ngữ pháp: điền am / is / are</h3>
+    <ol class="ex" id="ex1"></ol>
+    <div class="row" style="margin-top:12px"><button class="pri" id="ex-check">Kiểm tra</button><button id="ex-reset">Làm lại</button><span id="ex-score" class="mono"></span></div>
+  </div>
+
+  <div class="grid" style="margin-top:14px">
+    <div class="card">
+      <span class="tag">Nghe · 50 phút</span>
+      <h3>British Council A2: Four conversations</h3>
+      <ol class="tight"><li>Nghe 1 lần không xem transcript, ghi những gì hiểu (5 phút).</li><li>Làm 2 bài tập trong trang (10 phút).</li><li>Chọn 1 hội thoại, nghe từng câu và chép lại (25 phút). Dừng và tua lại bao nhiêu lần cũng được.</li><li>So với transcript, gạch chân chỗ nghe sai, ghi vào sổ lỗi (10 phút).</li></ol>
+      <p><a href="https://learnenglish.britishcouncil.org/free-resources/listening/a2/four-conversations" target="_blank" rel="noopener">Mở bài nghe</a></p>
+    </div>
+    <div class="card">
+      <span class="tag">Đọc + Nói · 50 phút</span>
+      <h3>Tự giới thiệu 5 câu</h3>
+      <div class="say">Hello, my name is Grace.<small>Xin chào, tên mình là Grace.</small></div>
+      <div class="say">I am a full-stack developer.<small>Mình là lập trình viên full-stack.</small></div>
+      <div class="say">I work for a software company in Vietnam.<small>Mình làm cho một công ty phần mềm ở Việt Nam.</small></div>
+      <div class="say">My team is small, but we are very busy.<small>Nhóm mình nhỏ nhưng rất bận.</small></div>
+      <div class="say">I am learning English because I want to speak at work.<small>Mình học tiếng Anh vì muốn nói chuyện ở chỗ làm.</small></div>
+      <ol class="tight"><li>Đọc to 5 câu 5 lần, nhại theo ngữ điệu (shadowing 10 phút).</li><li>Sửa câu cho đúng thông tin của bạn (5 phút).</li><li><b>Ghi âm lần đầu</b> (30-60 giây) và lưu lại. Đây là mốc để so sánh với ngày 88.</li></ol>
+    </div>
+  </div>
+  <div class="card" style="margin-top:14px">
+    <h3 style="margin-top:0">Cuối ngày (10 phút)</h3>
+    <p>Ghi vào sổ lỗi mọi câu làm sai và chỗ nghe sai. Ghi lại 1 điều khó nhất hôm nay. Tick các mục trong tab <a href="#hom-nay">Hôm nay</a>.</p>
+  </div>
+</div>
+  <div class="panel" id="p-chien-luoc">
+  <h2>Chiến lược tổng thể</h2>
+  <div class="note"><b>Mục tiêu thực tế: TOEIC 500 sau 90 ngày, cố gắng tốt 550.</b> Mức 650 trong bản nháp đầu là quá tham vọng: tăng 350-400 điểm với khoảng 270 giờ học thường không đạt, và dễ gây nản. Đặt 650 làm mốc tháng thứ 6. Nếu thi thử tuần 8 đạt từ 480 trở lên, nâng mục tiêu cuối lên 600.</div>
+  <div class="grid">
+    <div class="card"><span class="tag">Giai đoạn 1 · Tuần 1-4</span><h3>Nền tảng</h3><p>Ngữ pháp cơ bản, 400+ từ vựng, nghe chậm có transcript. Chỗ tăng điểm nhanh nhất ở trình độ này. Thi thử 1 (nửa đề) vào 20/12.</p></div>
+    <div class="card"><span class="tag">Giai đoạn 2 · Tuần 5-9</span><h3>Làm quen TOEIC</h3><p>Từ loại (word form), Part 1-7, thêm 600 từ TOEIC. Thi thử 2 (full đề) vào 17/01.</p></div>
+    <div class="card"><span class="tag">Giai đoạn 3 · Tuần 10-13</span><h3>Luyện đề, tăng tốc</h3><p>Sửa lỗi theo sổ lỗi, thi thử 3, 4 và thi thử cuối 20/02.</p></div>
+  </div>
+  <h3>Mốc điểm</h3>
+  <div class="scroll"><table><thead><tr><th>Mốc</th><th>Điểm mục tiêu</th><th>Ghi chú</th></tr></thead><tbody>
+    <tr><td>Đầu vào</td><td class="mono">250-300</td><td>A1-A2 (bạn tự đánh giá)</td></tr>
+    <tr><td>Thi thử 1 · 20/12</td><td class="mono">330-380</td><td>Tăng nhờ ngữ pháp + từ vựng</td></tr>
+    <tr><td>Thi thử 2 · 17/01</td><td class="mono">400-450</td><td>Part 1-2 ổn, Part 5 đúng trên 50%</td></tr>
+    <tr><td>Thi thử cuối · 20/02</td><td class="mono"><b>480-530</b></td><td>Mục tiêu chính 500, tốt 550</td></tr>
+    <tr><td>Tháng thứ 6</td><td class="mono">650</td><td>Mục tiêu cũ chuyển sang đây</td></tr></tbody></table></div>
+  <h3>7 nguyên tắc</h3>
+  <ol class="tight cols">
+    <li><b>Nền trước, đề sau.</b> Làm đề quá sớm chỉ cho điểm thấp ngẫu nhiên.</li>
+    <li><b>Nghe là đòn bẩy lớn nhất.</b> Nghe chép chính tả có transcript mỗi ngày.</li>
+    <li><b>Từ vựng mỗi ngày.</b> 15 từ mới/ngày bằng Anki, tổng khoảng 1.200 từ.</li>
+    <li><b>Ngữ pháp phục vụ Part 5-6.</b> Từ loại chiếm khoảng 1/3 câu Part 5.</li>
+    <li><b>Nói song song.</b> 20-30 phút/ngày: shadowing + tự ghi âm.</li>
+    <li><b>Đo bằng số.</b> Thi thử ở tuần 4, 8, 10, 12, 13 và ghi điểm từng Part.</li>
+    <li><b>Sổ lỗi.</b> Mỗi câu sai một dòng: câu, đáp án, lý do, quy tắc.</li>
+  </ol>
+  <h3>Khung 3 giờ mỗi ngày</h3>
+  <div class="scroll"><table><thead><tr><th>Khối</th><th>Thời lượng</th><th>Nội dung</th></tr></thead><tbody>
+    <tr><td>Từ vựng</td><td class="mono">30'</td><td>Anki: ôn thẻ đến hạn + 15 từ mới</td></tr>
+    <tr><td>Nghe</td><td class="mono">50'</td><td>Tuần 1-4: bài nghe A2/B1 + chép. Từ tuần 5: TOEIC Part 1-4</td></tr>
+    <tr><td>Ngữ pháp / Part 5-6</td><td class="mono">40'</td><td>Chủ điểm trong ngày + 20-30 câu</td></tr>
+    <tr><td>Đọc</td><td class="mono">25'</td><td>Đọc ngắn có từ điển; từ tuần 7 Part 7 bấm giờ</td></tr>
+    <tr><td>Nói</td><td class="mono">25'</td><td>Shadowing 10' + nói theo đề 10' + ghi âm 5'</td></tr>
+    <tr><td>Sổ lỗi + theo dõi</td><td class="mono">10'</td><td>Ghi lỗi, đánh dấu ngày học</td></tr></tbody></table></div>
+  <h3>Mục tiêu giao tiếp sau 90 ngày</h3>
+  <ul class="tight"><li>Tự giới thiệu và nói về công việc dev 2 phút không cần đọc giấy.</li><li>Stand-up 3 câu: hôm qua, hôm nay, vướng gì.</li><li>Mô tả một bug và cách sửa trong 1 phút.</li><li>Nghe BBC 6 Minute English hiểu khoảng 60-70% khi không xem transcript.</li></ul>
+</div>
+  <div class="panel" id="p-ngu-phap">
+  <h2>Lộ trình ngữ pháp</h2>
+  <p class="muted">Thứ tự theo độ hay ra thi và độ nền tảng. Mỗi chủ điểm học trong 1 ngày, làm 20-30 câu bài tập, rồi đưa lỗi vào sổ lỗi.</p>
+  <div class="scroll"><table><thead><tr><th>Tuần</th><th>Chủ điểm</th><th>Vì sao quan trọng</th></tr></thead><tbody>
+    <tr><td class="mono">1</td><td>To be, hiện tại đơn, cấu trúc câu S-V-O, 4 từ loại, đại từ</td><td>Mọi câu đều dựa vào đây</td></tr>
+    <tr><td class="mono">2</td><td>Hiện tại tiếp diễn, quá khứ đơn (có quy tắc + 50 bất quy tắc), câu hỏi Wh-</td><td>Part 2 là toàn câu hỏi</td></tr>
+    <tr><td class="mono">3</td><td>Hiện tại hoàn thành, will / be going to, modal verbs</td><td>Xuất hiện nhiều trong email, thông báo</td></tr>
+    <tr><td class="mono">4</td><td>Danh từ đếm được/không đếm được, mạo từ, lượng từ, giới từ thời gian và nơi chốn</td><td>Part 1-2, Part 5</td></tr>
+    <tr><td class="mono">5</td><td><b>Word form</b>: hậu tố danh/tính/trạng/động từ, vị trí từ loại</td><td>Khoảng 1/3 Part 5</td></tr>
+    <tr><td class="mono">6</td><td>So sánh, tính từ vs trạng từ, V-ing vs to V, động từ + giới từ</td><td>Part 5-6</td></tr>
+    <tr><td class="mono">7</td><td>Câu bị động, liên từ (because/although), trạng từ nối</td><td>Part 5-6-7</td></tr>
+    <tr><td class="mono">8</td><td>Mệnh đề quan hệ who/which/that, rút gọn</td><td>Câu dài ở Part 7</td></tr>
+    <tr><td class="mono">9</td><td>Câu điều kiện 1-2, phân từ -ing/-ed, cặp liên từ</td><td>Part 5 nâng cao</td></tr>
+    <tr><td class="mono">10-13</td><td>Ôn theo sổ lỗi của chính bạn</td><td>Sửa đúng chỗ sai nhiều nhất</td></tr></tbody></table></div>
+  <h3>Bảng tra nhanh: mẹo Part 5</h3>
+  <div class="grid">
+    <div class="card"><b>Chỗ trống sau mạo từ/tính từ sở hữu</b><p class="muted" style="margin:6px 0 0">Cần danh từ (the <u>decision</u>, our <u>manager</u>).</p></div>
+    <div class="card"><b>Chỗ trống trước danh từ</b><p class="muted" style="margin:6px 0 0">Cần tính từ (an <u>effective</u> plan).</p></div>
+    <div class="card"><b>Chỗ trống giữa chủ ngữ và động từ chính</b><p class="muted" style="margin:6px 0 0">Thường là trạng từ (we <u>quickly</u> replied).</p></div>
+    <div class="card"><b>Sau giới từ</b><p class="muted" style="margin:6px 0 0">Danh từ hoặc V-ing (interested in <u>learning</u>).</p></div>
+  </div>
+  <p class="muted" style="margin-top:10px">Bản đầy đủ có ví dụ và bài tập theo từng tuần sẽ được viết thêm trong tài liệu ngữ pháp riêng.</p>
+</div>
+  <div class="panel" id="p-noi-tu-vung">
+  <h2>Từ vựng: hệ thống Anki</h2>
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0">Quy trình mỗi ngày (30 phút)</h3><ol class="tight"><li>Ôn hết thẻ đến hạn trước (khoảng 15-20 phút).</li><li>Thêm 15 từ mới: từ, nghĩa, 1 câu ví dụ của bạn, phát âm.</li><li>Cuối tuần: xem thẻ khó (lapses), viết lại câu ví dụ.</li></ol></div>
+    <div class="card"><h3 style="margin-top:0">Chỉ tiêu</h3><div class="stat">~1.200 từ</div><p class="muted">600 từ thông dụng (tuần 1-4) + 600 từ TOEIC (tuần 5-9), ôn lại ở tuần 10-13.</p></div>
+  </div>
+  <h3>Nhóm từ TOEIC nên học</h3>
+  <ul class="tight cols"><li>Công việc, văn phòng, tuyển dụng</li><li>Họp, báo cáo, hợp đồng</li><li>Mua sắm, hóa đơn, giao hàng</li><li>Du lịch, khách sạn, đặt vé</li><li>Tài chính, ngân hàng, bảo hiểm</li><li>Sản xuất, kho, bảo trì</li></ul>
+  <h2 style="margin-top:28px">Luyện nói</h2>
+  <div class="grid">
+    <div class="card"><h3 style="margin-top:0">Quy trình 25 phút/ngày</h3><ol class="tight"><li>Shadowing 10 phút: nghe một câu, nhại lại giống cả ngữ điệu.</li><li>Nói theo đề trong lịch 10 phút.</li><li>Ghi âm 5 phút, nghe lại, sửa 1 lỗi.</li></ol></div>
+    <div class="card"><h3 style="margin-top:0">Ghi âm mốc</h3><p>Ghi âm "tự giới thiệu" ở ngày 1, ngày 28, 56 và 88. Nghe so sánh bốn bản để thấy tiến bộ thật.</p></div>
+  </div>
+  <h3>Mẫu câu cho dev</h3>
+  <div class="say">Yesterday I fixed a bug in the login page.<small>Stand-up: hôm qua</small></div>
+  <div class="say">Today I'm going to work on the payment API.<small>Stand-up: hôm nay</small></div>
+  <div class="say">I'm blocked because the test server is down.<small>Stand-up: vướng mắc</small></div>
+  <div class="say">The bug happens when the user clicks the button twice.<small>Mô tả bug</small></div>
+  <div class="say">Could you repeat that, please?<small>Hỏi lại khi chưa nghe rõ</small></div>
+  <div class="say">I agree with you, but I'm worried about the deadline.<small>Họp: đồng ý có điều kiện</small></div>
+</div>
+  <div class="panel" id="p-toeic">
+  <h2>Chiến lược TOEIC Part 1-7</h2>
+  <p class="muted">Đề có 200 câu, 120 phút: Nghe 100 câu (45 phút), Đọc 100 câu (75 phút), điểm tối đa 990.</p>
+  <div class="scroll"><table><thead><tr><th>Part</th><th>Dạng</th><th>Số câu</th><th>Chiến lược</th></tr></thead><tbody>
+    <tr><td class="mono">1</td><td>Mô tả tranh</td><td class="mono">6</td><td>Xem tranh trước khi nghe, đoán động từ/vị trí. Loại đáp án nhắc đồ vật không có trong tranh.</td></tr>
+    <tr><td class="mono">2</td><td>Hỏi - đáp</td><td class="mono">25</td><td>Nghe kỹ từ để hỏi (Who/When/Where…). Cẩn thận bẫy từ phát âm giống.</td></tr>
+    <tr><td class="mono">3</td><td>Hội thoại ngắn</td><td class="mono">39</td><td>Đọc trước câu hỏi trong thời gian nghỉ. Đáp án thường theo thứ tự câu hỏi.</td></tr>
+    <tr><td class="mono">4</td><td>Bài nói ngắn</td><td class="mono">30</td><td>Nghe câu mở đầu để biết ai nói, ở đâu, về chủ đề gì.</td></tr>
+    <tr><td class="mono">5</td><td>Điền câu</td><td class="mono">30</td><td>Xác định từ loại cần điền trước. Mục tiêu 15 phút cho cả phần.</td></tr>
+    <tr><td class="mono">6</td><td>Điền đoạn</td><td class="mono">16</td><td>Có câu hỏi chọn câu điền vào: đọc câu trước và sau chỗ trống.</td></tr>
+    <tr><td class="mono">7</td><td>Đọc hiểu</td><td class="mono">54</td><td>Đọc câu hỏi trước, tìm từ khóa trong bài. Bỏ câu quá khó, quay lại sau.</td></tr></tbody></table></div>
+  <div class="note"><b>Không bỏ trống câu nào.</b> TOEIC không trừ điểm câu sai. Còn 1 phút thì tô đại các câu còn lại.</div>
+  <h3>Chiến lược theo trình độ 250-500</h3>
+  <ul class="tight"><li>Ưu tiên Part 1, 2, 5 vì dễ lấy điểm nhất và cần ít từ vựng nhất.</li><li>Part 3-4: đừng cố nghe hết, chỉ bắt đáp án.</li><li>Part 7 dài: ở mức 500, hãy làm chắc Part 7 đoạn đơn, chưa cần cố làm đoạn kép/ba.</li></ul>
+</div>
+</section>
+
+<!-- TÀI LIỆU -->
+<section class="view" id="v-tai-lieu">
+<h2>Kho tài liệu</h2>
+<p class="muted">Mỗi mục dưới đây đã mở được ngày 19/11/2026 (mình đã đọc trang). Ghi rõ phí, level và lý do chọn. Mình chưa kiểm tra ngày cập nhật từng bài, nên khi thấy một bài cũ, bạn chuyển sang bài khác trong cùng mục.</p>
+<div class="grid" style="margin-bottom:14px">
+<div class="card"><span class="tag">Tuần 1-4 · A2</span><p style="margin:8px 0 0">British Council A2 + ngữ pháp A1-A2, ELLLO, VOA, Anki với Oxford 3000.</p></div>
+<div class="card"><span class="tag">Tuần 5-9 · B1</span><p style="margin:8px 0 0">BBC 6 Minute English, Đậu TOEIC theo Part, British Council B1-B2, The English We Speak.</p></div>
+<div class="card"><span class="tag">Tuần 10+ và sau 90 ngày · B2</span><p style="margin:8px 0 0">Đề full (Đậu TOEIC, Parroto, ETS), TED Talks, YouGlish, đăng ký thi thật qua IIG.</p></div></div>
+<div class="chips" id="f-lv"><button aria-pressed="true" data-f="all">Mọi level</button>
+<button aria-pressed="false" data-f="a2">250-300 → A2</button>
+<button aria-pressed="false" data-f="b1">B1 (400-600)</button>
+<button aria-pressed="false" data-f="b2">B2 trở lên</button>
+</div><div class="chips" id="f-sk"><button aria-pressed="true" data-f="all">Mọi kỹ năng</button>
+<button aria-pressed="false" data-f="nghe">Nghe</button>
+<button aria-pressed="false" data-f="doc">Đọc</button>
+<button aria-pressed="false" data-f="noi">Nói</button>
+<button aria-pressed="false" data-f="nguphap">Ngữ pháp</button>
+<button aria-pressed="false" data-f="tuvung">Từ vựng</button>
+<button aria-pressed="false" data-f="de">Đề thi thử</button>
+<button aria-pressed="false" data-f="thithat">Thi thật</button>
+</div><div class="grid" id="res">
+<article class="card" data-lv="a2 b1 b2" data-sk="de nghe tuvung nguphap"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí</span><span class="tag plain">250-300</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://dauenglish.com/">Đậu TOEIC</a></h3><p style="margin:0 0 8px">Trang luyện TOEIC bằng tiếng Việt: đề 200 câu 7 Part có audio từng câu, nghe chép chính tả, đọc song ngữ, 51 chủ điểm ngữ pháp, từ vựng có ảnh. Có chuỗi ngày học, XP và cài được như ứng dụng (PWA). Chọn vì gần nhất với kế hoạch này.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Bên thứ ba, không phải ETS. Các con số là của chính trang. Trang ghi miễn phí, không cần thẻ, đăng nhập bằng Google.</p></article>
+<article class="card" data-lv="b1 b2" data-sk="de"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí (theo trang)</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://parroto.app/exams/toeic">Parroto TOEIC</a></h3><p style="margin:0 0 8px">Nhiều bộ đề thi thử full 7 Part, tự chấm điểm và có giải thích đáp án. Dùng làm nguồn đề thứ hai để không hết đề.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Trang không nêu rõ có audio hay phải đăng ký. Hãy thử một đề trước khi dùng cho mốc thi thử.</p></article>
+<article class="card" data-lv="b1 b2" data-sk="de doc"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://www.ets.org/toeic/test-takers/prepare.html">ETS: Sample Test chính thức</a></h3><p style="margin:0 0 8px">Đề mẫu PDF và sổ tay thí sinh do ETS (đơn vị ra đề) cung cấp. Dùng để biết đúng định dạng và độ khó thật, đặc biệt Part 5-7.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Theo kiểm tra trước đó, PDF không có audio, chỉ có script. Khóa ETS Official Learning and Preparation Course có phí, trang không hiển thị giá.</p></article>
+<article class="card" data-lv="b1 b2" data-sk="thithat"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag warn">Phí thi do IIG công bố</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://iigvietnam.com/">IIG Việt Nam</a></h3><p style="margin:0 0 8px">Đại diện chính thức của ETS tại Việt Nam, đăng ký thi TOEIC thật online. Dùng khi bạn đã đạt khoảng 480-500 ở thi thử.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Trang chủ không hiển thị lệ phí và lịch thi. Vào mục TOEIC trên trang để xem.</p></article>
+<article class="card" data-lv="a2" data-sk="nghe"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí</span><span class="tag plain">250-300</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://learnenglish.britishcouncil.org/free-resources/listening/a2">British Council: A2 listening</a></h3><p style="margin:0 0 8px">Hội thoại ngắn, rõ, có audio, bài chuẩn bị, 2 bài tập và transcript. Hợp nhất cho tuần 1-4 và để chép chính tả.</p></article>
+<article class="card" data-lv="a2 b1 b2" data-sk="nghe doc nguphap tuvung"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí (tài khoản miễn phí để dùng đầy đủ)</span><span class="tag plain">250-300</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://learnenglish.britishcouncil.org/free-resources">British Council: thư viện miễn phí</a></h3><p style="margin:0 0 8px">Lọc được theo level CEFR, kỹ năng và chủ đề. Dùng khi cần nghe và đọc ở B1, B2 sau khi xong A2.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Có khóa tự học trả phí riêng, không bắt buộc.</p></article>
+<article class="card" data-lv="a2" data-sk="nguphap"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí</span><span class="tag plain">250-300</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://learnenglish.britishcouncil.org/free-resources/grammar/a1-a2">British Council: ngữ pháp A1-A2</a></h3><p style="margin:0 0 8px">Bài ngữ pháp ngắn, có giải thích và bài tập: giới từ, mạo từ, so sánh, câu hỏi. Khớp tuần 1-4.</p></article>
+<article class="card" data-lv="b1 b2" data-sk="nguphap"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://learnenglish.britishcouncil.org/free-resources/grammar/b1-b2">British Council: ngữ pháp B1-B2</a></h3><p style="margin:0 0 8px">Bài tiếp theo cho các chủ điểm tuần 5-9 như bị động, mệnh đề quan hệ, câu điều kiện.</p></article>
+<article class="card" data-lv="a2 b1 b2" data-sk="nghe"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí</span><span class="tag plain">250-300</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://www.elllo.org/">ELLLO</a></h3><p style="margin:0 0 8px">Hơn 3.000 bài nghe, đa số có audio/video, transcript, từ vựng và quiz. Nhiều giọng khác nhau, tốt để quen giọng thật.</p></article>
+<article class="card" data-lv="a2 b1" data-sk="nghe doc"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí (theo từ khóa của trang)</span><span class="tag plain">250-300</span><span class="tag plain">B1</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://learningenglish.voanews.com/">VOA Learning English</a></h3><p style="margin:0 0 8px">Tin tức đọc chậm bằng tiếng Anh Mỹ, chia Beginning, Intermediate, Advanced. Hợp để nghe và đọc nhẹ mỗi ngày.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Trang chủ không nêu rõ audio và transcript từng bài.</p></article>
+<article class="card" data-lv="b1 b2" data-sk="nghe tuvung"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://www.bbc.co.uk/learningenglish/features/6-minute-english">BBC 6 Minute English</a></h3><p style="margin:0 0 8px">Podcast 6 phút, có worksheet, transcript và quiz theo từng tập (theo mô tả của BBC). Bắt đầu từ tuần 5; tuần 1-4 còn hơi nhanh.</p></article>
+<article class="card" data-lv="b1 b2" data-sk="noi nghe"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://www.bbc.co.uk/learningenglish/english/features/the-english-we-speak">BBC The English We Speak</a></h3><p style="margin:0 0 8px">Chương trình học cách nói thông dụng, hữu ích cho phần nói và họp.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Chưa xác nhận độ dài tập và ngày tập mới nhất.</p></article>
+<article class="card" data-lv="a2 b1 b2" data-sk="tuvung"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag warn">Miễn phí trên máy tính và Android (AnkiDroid); iOS có phí</span><span class="tag plain">250-300</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://apps.ankiweb.net/">Anki</a></h3><p style="margin:0 0 8px">Thẻ ghi nhớ ngắt quãng, nền tảng của khối từ vựng 30 phút mỗi ngày. Trang ghi phiên bản hiện tại 26.09.4.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Giá bản iOS (AnkiMobile) không hiển thị trên trang.</p></article>
+<article class="card" data-lv="a2 b1 b2" data-sk="tuvung"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Xem miễn phí trên web</span><span class="tag plain">250-300</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://www.oxfordlearnersdictionaries.com/wordlists/oxford3000-5000">Oxford 3000 và 5000</a></h3><p style="margin:0 0 8px">Danh sách các từ quan trọng nhất do Oxford chọn, dùng làm nguồn cho 600 từ thông dụng của tuần 1-4.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Trang không ghi rõ cấp độ, audio hay tải xuống.</p></article>
+<article class="card" data-lv="a2 b1 b2" data-sk="tuvung noi"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Tra trực tiếp trên web</span><span class="tag plain">250-300</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://dictionary.cambridge.org/">Cambridge Dictionary</a></h3><p style="margin:0 0 8px">Từ điển cho người học, có phát âm và bản dịch. Nghe phát âm trước khi lưu thẻ Anki.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Trang không nêu chi phí.</p></article>
+<article class="card" data-lv="b1 b2" data-sk="noi"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí (giới hạn chưa xác nhận)</span><span class="tag plain">B1</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://youglish.com/">YouGlish</a></h3><p style="margin:0 0 8px">Gõ một từ hoặc cụm, xem người thật nói câu đó trong hơn 100 triệu đoạn video. Dùng để luyện shadowing.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Giới hạn dùng miễn phí không có trên trang.</p></article>
+<article class="card" data-lv="b2" data-sk="nghe noi"><div class="row" style="gap:6px;margin-bottom:8px"><span class="tag ">Miễn phí xem trực tuyến</span><span class="tag plain">B2</span></div><h3 style="margin:0 0 6px"><a target="_blank" rel="noopener" href="https://www.ted.com/talks">TED Talks</a></h3><p style="margin:0 0 8px">Có phụ đề hơn 100 ngôn ngữ (theo mô tả của TED). Dùng từ giai đoạn B1 trở lên: chọn bài ngắn, xem phụ đề tiếng Anh rồi chép lại.</p><p class="muted" style="margin:0;font-size:.85rem">Lưu ý: Chưa xác nhận có phụ đề tiếng Việt cho từng bài.</p></article>
+</div><p class="muted" id="res-empty" hidden style="margin-top:12px">Không có mục nào khớp bộ lọc này.</p>
+<div class="note"><b>Còn thiếu:</b> chưa có nguồn đề thi thử chính thức của ETS có audio miễn phí. Đậu TOEIC và Parroto là bên thứ ba, hãy dùng để luyện và dùng đề ETS để kiểm tra định dạng. Khóa chính thức của ETS có phí, mình chưa xem được giá.</div>
+<h3>Ý tưởng lấy từ Đậu TOEIC cho web này</h3><ul class="tight"><li>Mục tiêu hôm nay, chuỗi ngày học và lưới tiến độ.</li><li>Tách riêng nghe chép chính tả và sổ lỗi để ôn câu sai.</li><li>Cài như ứng dụng trên điện thoại để mở nhanh mỗi ngày.</li></ul><p class="muted">Mình chỉ tham khảo cách tổ chức, không sao chép nội dung hay đề.</p>
+<script>(function(){var f={lv:"all",sk:"all"};function ap(){var n=0;document.querySelectorAll("#res article").forEach(function(a){var ok=(f.lv==="all"||a.dataset.lv.split(" ").indexOf(f.lv)>-1)&&(f.sk==="all"||a.dataset.sk.split(" ").indexOf(f.sk)>-1);a.hidden=!ok;if(ok)n++});document.getElementById("res-empty").hidden=n>0}
+[["f-lv","lv"],["f-sk","sk"]].forEach(function(p){document.querySelectorAll("#"+p[0]+" button").forEach(function(b){b.addEventListener("click",function(){f[p[1]]=b.dataset.f;document.querySelectorAll("#"+p[0]+" button").forEach(function(x){x.setAttribute("aria-pressed",x===b)});ap()})})})})();</script>
+</section>
+
+<!-- ĐIỂM -->
+<section class="view" id="v-diem">
+  <h2>Theo dõi điểm thi thử</h2>
+  <p class="muted">Dữ liệu lưu trong trình duyệt này. Mỗi phần Nghe và Đọc tối đa 495 điểm. Điểm từ trang luyện đề của bên thứ ba chỉ là ước lượng, đề chính thức của ETS mới sát nhất.</p>
+  <div class="card">
+    <div class="row">
+      <label for="m-name">Lần thi</label>
+      <select id="m-name"><option>Thi thử 1 (20/12)</option><option>Thi thử 2 (17/01)</option><option>Thi thử 3 (31/01)</option><option>Thi thử 4 (14/02)</option><option>Thi thử cuối (20/02)</option><option>Đầu vào (tự ước lượng)</option></select>
+      <label for="m-l">Nghe</label><input id="m-l" type="number" min="5" max="495" step="5" style="width:90px">
+      <label for="m-r">Đọc</label><input id="m-r" type="number" min="5" max="495" step="5" style="width:90px">
+      <button class="pri" id="m-add">Lưu</button>
+    </div>
+  </div>
+  <div style="margin-top:14px" class="card"><svg id="chart" class="chart" viewBox="0 0 640 240" role="img" aria-label="Biểu đồ điểm thi thử theo thời gian"></svg></div>
+  <div class="scroll" style="margin-top:14px"><table><thead><tr><th>Lần thi</th><th>Nghe</th><th>Đọc</th><th>Tổng</th><th></th></tr></thead><tbody id="m-rows"></tbody></table></div>
+  <h3>Quy tắc điều chỉnh</h3>
+  <ul class="tight"><li>Tổng thi thử 2 từ 480 trở lên: nâng mục tiêu cuối lên 600.</li><li>Tổng thi thử 2 dưới 380: giữ mục tiêu 500, dành thêm 2 tuần cho giai đoạn nền tảng, bớt thời gian Part 7.</li><li>Nghe thấp hơn Đọc trên 60 điểm: tăng thời gian nghe chép chính tả lên 70 phút/ngày.</li><li>Đọc thấp hơn Nghe trên 60 điểm: tăng Part 5 và từ loại lên 40 câu/ngày.</li></ul>
+</section>
+</div>
+
+<script>
+const DAYS = [{"n": 1, "d": "2026-11-23", "w": 1, "p": 1, "g": "To be (am/is/are)", "l": "BC A2: Four conversations", "r": "Đọc 5 câu tự giới thiệu mẫu", "s": "Tự giới thiệu 30 giây", "sun": 0}, {"n": 2, "d": "2026-11-24", "w": 1, "p": 1, "g": "Hiện tại đơn: khẳng định", "l": "BC A2: 1 bài + chép 10 câu", "r": "Đọc mô tả công việc ngắn", "s": "Nói về công việc hằng ngày", "sun": 0}, {"n": 3, "d": "2026-11-25", "w": 1, "p": 1, "g": "Hiện tại đơn: phủ định, câu hỏi (do/does)", "l": "BC A2: 1 bài + chép 10 câu", "r": "Đọc email ngắn", "s": "Hỏi-đáp về thói quen", "sun": 0}, {"n": 4, "d": "2026-11-26", "w": 1, "p": 1, "g": "Cấu trúc câu S-V-O, S-V-C", "l": "ELLLO A2: 1 bài + chép", "r": "Tách S/V/O 10 câu", "s": "Mô tả công ty", "sun": 0}, {"n": 5, "d": "2026-11-27", "w": 1, "p": 1, "g": "4 từ loại: danh/động/tính/trạng từ", "l": "ELLLO A2: 1 bài + chép", "r": "Gạch chân từ loại 1 đoạn", "s": "Mô tả đồng nghiệp", "sun": 0}, {"n": 6, "d": "2026-11-28", "w": 1, "p": 1, "g": "Đại từ, tính từ sở hữu", "l": "BC A2: 1 bài + chép", "r": "Đọc thông báo văn phòng", "s": "Tự giới thiệu 1 phút + ghi âm", "sun": 0}, {"n": 7, "d": "2026-11-29", "w": 1, "p": 1, "g": "Ôn tuần + làm lại Phần B, C bài kiểm tra đầu vào (mốc gốc)", "l": "", "r": "", "s": "", "sun": 1}, {"n": 8, "d": "2026-11-30", "w": 2, "p": 1, "g": "Hiện tại tiếp diễn", "l": "BC A2: 1 bài + chép", "r": "Đọc tin nhắn Slack mẫu", "s": "Đang làm gì ở công ty", "sun": 0}, {"n": 9, "d": "2026-12-01", "w": 2, "p": 1, "g": "Hiện tại đơn vs tiếp diễn", "l": "ELLLO: 1 bài + chép", "r": "Đọc lịch làm việc", "s": "Mô tả tuần này", "sun": 0}, {"n": 10, "d": "2026-12-02", "w": 2, "p": 1, "g": "Quá khứ đơn: động từ có quy tắc", "l": "BC A2: 1 bài + chép", "r": "Đọc báo cáo ngắn", "s": "Kể hôm qua", "sun": 0}, {"n": 11, "d": "2026-12-03", "w": 2, "p": 1, "g": "Quá khứ đơn: 50 động từ bất quy tắc thông dụng", "l": "ELLLO: 1 bài + chép", "r": "Đọc câu chuyện ngắn", "s": "Kể cuối tuần trước", "sun": 0}, {"n": 12, "d": "2026-12-04", "w": 2, "p": 1, "g": "Câu hỏi Wh- (what/when/where/who/why/how)", "l": "Nghe nhận biết từ để hỏi", "r": "Đọc FAQ ngắn", "s": "Đặt 10 câu hỏi Wh-", "sun": 0}, {"n": 13, "d": "2026-12-05", "w": 2, "p": 1, "g": "Câu hỏi Yes/No, câu hỏi đuôi cơ bản", "l": "BC A2: 1 bài + chép", "r": "Đọc thư mời họp", "s": "Kể dự án gần nhất", "sun": 0}, {"n": 14, "d": "2026-12-06", "w": 2, "p": 1, "g": "Ôn tuần + kiểm tra mini (30 câu ngữ pháp + 50 từ)", "l": "", "r": "", "s": "", "sun": 1}, {"n": 15, "d": "2026-12-07", "w": 3, "p": 1, "g": "Hiện tại hoàn thành: cấu trúc", "l": "BC A2: 1 bài + chép", "r": "Đọc changelog", "s": "Đã làm được gì tuần này", "sun": 0}, {"n": 16, "d": "2026-12-08", "w": 3, "p": 1, "g": "Hiện tại hoàn thành vs quá khứ đơn", "l": "ELLLO: 1 bài + chép", "r": "Đọc email cập nhật", "s": "Kinh nghiệm làm việc", "sun": 0}, {"n": 17, "d": "2026-12-09", "w": 3, "p": 1, "g": "Tương lai: will vs be going to", "l": "BC B1: 1 bài + chép", "r": "Đọc kế hoạch dự án", "s": "Kế hoạch tuần sau", "sun": 0}, {"n": 18, "d": "2026-12-10", "w": 3, "p": 1, "g": "Modal: can, could, should, must, have to", "l": "Nghe số, giờ, ngày tháng", "r": "Đọc nội quy", "s": "Xin phép, đề nghị", "sun": 0}, {"n": 19, "d": "2026-12-11", "w": 3, "p": 1, "g": "Modal: may, might, would (lịch sự)", "l": "ELLLO: 1 bài + chép", "r": "Đọc thông báo bảo trì", "s": "Đề nghị lịch sự trong họp", "sun": 0}, {"n": 20, "d": "2026-12-12", "w": 3, "p": 1, "g": "Ôn các thì", "l": "BC B1: 1 bài + chép", "r": "Đọc 1 đoạn hỗn hợp thì", "s": "Stand-up 3 câu + ghi âm", "sun": 0}, {"n": 21, "d": "2026-12-13", "w": 3, "p": 1, "g": "Ôn tuần + kiểm tra mini", "l": "", "r": "", "s": "", "sun": 1}, {"n": 22, "d": "2026-12-14", "w": 4, "p": 1, "g": "Danh từ đếm được / không đếm được", "l": "TOEIC Part 1: làm quen 10 tranh", "r": "Đọc biểu mẫu", "s": "Mô tả văn phòng", "sun": 0}, {"n": 23, "d": "2026-12-15", "w": 4, "p": 1, "g": "Mạo từ a/an/the", "l": "TOEIC Part 1: 10 tranh", "r": "Đọc quảng cáo ngắn", "s": "Mô tả bàn làm việc", "sun": 0}, {"n": 24, "d": "2026-12-16", "w": 4, "p": 1, "g": "Lượng từ: some/any/much/many/a few/a little", "l": "TOEIC Part 2: 15 câu", "r": "Đọc hóa đơn", "s": "Mua sắm, hỏi giá", "sun": 0}, {"n": 25, "d": "2026-12-17", "w": 4, "p": 1, "g": "Giới từ thời gian: in/on/at, by, until", "l": "TOEIC Part 2: 15 câu", "r": "Đọc lịch sự kiện", "s": "Hẹn lịch họp", "sun": 0}, {"n": 26, "d": "2026-12-18", "w": 4, "p": 1, "g": "Giới từ nơi chốn và chuyển động", "l": "TOEIC Part 1-2: 20 câu", "r": "Đọc chỉ đường", "s": "Chỉ đường đến công ty", "sun": 0}, {"n": 27, "d": "2026-12-19", "w": 4, "p": 1, "g": "Ôn tuần 1-4", "l": "Part 1-2: 25 câu", "r": "Đọc 2 đoạn ngắn", "s": "Mô tả nơi làm việc 1 phút + ghi âm", "sun": 0}, {"n": 28, "d": "2026-12-20", "w": 4, "p": 1, "g": "**THI THỬ 1** (nửa đề: Part 1-2, Part 5-6) + chữa", "l": "", "r": "", "s": "", "sun": 1}, {"n": 29, "d": "2026-12-21", "w": 5, "p": 2, "g": "Word form: hậu tố danh từ (-tion, -ment, -ness, -er)", "l": "Part 1: 10 tranh", "r": "Part 5: 15 câu từ loại", "s": "Mô tả tranh", "sun": 0}, {"n": 30, "d": "2026-12-22", "w": 5, "p": 2, "g": "Word form: hậu tố tính từ (-ive, -able, -ful, -al)", "l": "Part 2: 20 câu", "r": "Part 5: 15 câu từ loại", "s": "Mô tả tranh", "sun": 0}, {"n": 31, "d": "2026-12-23", "w": 5, "p": 2, "g": "Word form: trạng từ (-ly) và vị trí", "l": "Part 1-2: 20 câu", "r": "Part 5: 20 câu từ loại", "s": "Mô tả tranh có người", "sun": 0}, {"n": 32, "d": "2026-12-24", "w": 5, "p": 2, "g": "Word form: động từ (-ize, -en, -ify)", "l": "Part 3 làm quen: 2 đoạn", "r": "Part 5: 20 câu", "s": "Mô tả 1 ngày làm việc", "sun": 0}, {"n": 33, "d": "2026-12-25", "w": 5, "p": 2, "g": "Vị trí từ loại trong câu (trước/sau danh từ)", "l": "Part 3: 2 đoạn + đọc transcript", "r": "Part 5: 20 câu", "s": "Mô tả tranh 45 giây", "sun": 0}, {"n": 34, "d": "2026-12-26", "w": 5, "p": 2, "g": "Ôn từ loại", "l": "Part 1-3: 25 câu", "r": "Part 5: 30 câu bấm giờ 15 phút", "s": "Mô tả 3 tranh + ghi âm", "sun": 0}, {"n": 35, "d": "2026-12-27", "w": 5, "p": 2, "g": "Ôn từ loại + kiểm tra 40 câu Part 5", "l": "", "r": "", "s": "", "sun": 1}, {"n": 36, "d": "2026-12-28", "w": 6, "p": 2, "g": "So sánh hơn, so sánh nhất", "l": "Part 2: 20 câu", "r": "Part 5: 20 câu", "s": "Mô tả bug", "sun": 0}, {"n": 37, "d": "2026-12-29", "w": 6, "p": 2, "g": "Tính từ vs trạng từ", "l": "Part 3: 3 đoạn", "r": "Part 5: 20 câu", "s": "So sánh 2 framework", "sun": 0}, {"n": 38, "d": "2026-12-30", "w": 6, "p": 2, "g": "V-ing vs to V (enjoy doing, want to do)", "l": "Part 3: 3 đoạn", "r": "Part 5: 20 câu", "s": "Sở thích và mục tiêu", "sun": 0}, {"n": 39, "d": "2026-12-31", "w": 6, "p": 2, "g": "Động từ + giới từ thường gặp", "l": "Part 4 làm quen: 2 bài", "r": "Đọc Part 7: 1 đoạn đơn", "s": "Giải thích nguyên nhân bug", "sun": 0}, {"n": 40, "d": "2027-01-01", "w": 6, "p": 2, "g": "Đại từ phản thân, đại từ bất định", "l": "Part 3-4: 4 đoạn", "r": "Part 6: 1 đoạn", "s": "Mô tả bug + cách sửa", "sun": 0}, {"n": 41, "d": "2027-01-02", "w": 6, "p": 2, "g": "Ôn tuần 6", "l": "Part 1-4 mini: 30 câu", "r": "Part 5: 30 câu bấm giờ", "s": "Mô tả bug 1 phút + ghi âm", "sun": 0}, {"n": 42, "d": "2027-01-03", "w": 6, "p": 2, "g": "Ôn tuần + kiểm tra mini", "l": "", "r": "", "s": "", "sun": 1}, {"n": 43, "d": "2027-01-04", "w": 7, "p": 2, "g": "Bị động: hiện tại đơn, quá khứ đơn", "l": "Part 2: 20 câu", "r": "Part 5: 20 câu", "s": "Đồng ý / không đồng ý", "sun": 0}, {"n": 44, "d": "2027-01-05", "w": 7, "p": 2, "g": "Bị động: các thì khác + modal", "l": "Part 3: 3 đoạn", "r": "Part 7: 2 đoạn đơn", "s": "Đưa ý kiến trong họp", "sun": 0}, {"n": 45, "d": "2027-01-06", "w": 7, "p": 2, "g": "Liên từ: and/but/or/so, because/although", "l": "Part 3: 3 đoạn", "r": "Part 5: 20 câu", "s": "Ngắt lời lịch sự", "sun": 0}, {"n": 46, "d": "2027-01-07", "w": 7, "p": 2, "g": "Because vs because of, although vs despite", "l": "Part 4: 3 bài", "r": "Part 7: 2 đoạn", "s": "Hỏi lại khi không hiểu", "sun": 0}, {"n": 47, "d": "2027-01-08", "w": 7, "p": 2, "g": "Trạng từ nối: however, therefore, moreover", "l": "Part 4: 3 bài", "r": "Part 6: 2 đoạn", "s": "Tóm tắt cuộc họp", "sun": 0}, {"n": 48, "d": "2027-01-09", "w": 7, "p": 2, "g": "Ôn tuần 7", "l": "Part 1-4 mini: 30 câu", "r": "Part 5+6 bấm giờ", "s": "Họp giả lập 2 phút + ghi âm", "sun": 0}, {"n": 49, "d": "2027-01-10", "w": 7, "p": 2, "g": "Ôn tuần + kiểm tra mini", "l": "", "r": "", "s": "", "sun": 1}, {"n": 50, "d": "2027-01-11", "w": 8, "p": 2, "g": "Mệnh đề quan hệ: who, which, that", "l": "Part 3: 3 đoạn", "r": "Part 6: 2 đoạn", "s": "Trình bày tính năng", "sun": 0}, {"n": 51, "d": "2027-01-12", "w": 8, "p": 2, "g": "Mệnh đề quan hệ: whose, where, rút gọn", "l": "Part 4: 3 bài", "r": "Part 7: 2 đoạn", "s": "Trình bày tính năng", "sun": 0}, {"n": 52, "d": "2027-01-13", "w": 8, "p": 2, "g": "Đại từ quan hệ trong Part 5", "l": "Part 3: 3 đoạn", "r": "Part 5: 30 câu", "s": "Giải thích kiến trúc đơn giản", "sun": 0}, {"n": 53, "d": "2027-01-14", "w": 8, "p": 2, "g": "Ôn từ loại + bị động", "l": "Part 4: 3 bài", "r": "Part 7: 1 đoạn kép", "s": "Demo sản phẩm", "sun": 0}, {"n": 54, "d": "2027-01-15", "w": 8, "p": 2, "g": "Ôn liên từ + giới từ", "l": "Part 2: 25 câu", "r": "Part 6: 3 đoạn", "s": "Trả lời câu hỏi sau demo", "sun": 0}, {"n": 55, "d": "2027-01-16", "w": 8, "p": 2, "g": "Ôn sổ lỗi, chuẩn bị thi thử", "l": "Part 1-4: 1 bộ ngắn", "r": "Part 7: 2 đoạn", "s": "Trình bày tính năng 1 phút + ghi âm", "sun": 0}, {"n": 56, "d": "2027-01-17", "w": 8, "p": 2, "g": "**THI THỬ 2** (full đề 2 giờ) + chữa", "l": "", "r": "", "s": "", "sun": 1}, {"n": 57, "d": "2027-01-18", "w": 9, "p": 2, "g": "Câu điều kiện loại 1", "l": "Part 3: 4 đoạn", "r": "Part 7: đoạn kép", "s": "Phỏng vấn: giới thiệu bản thân", "sun": 0}, {"n": 58, "d": "2027-01-19", "w": 9, "p": 2, "g": "Câu điều kiện loại 2", "l": "Part 4: 4 bài", "r": "Part 7: đoạn kép", "s": "Phỏng vấn: điểm mạnh/yếu", "sun": 0}, {"n": 59, "d": "2027-01-20", "w": 9, "p": 2, "g": "Phân từ: -ing vs -ed (interesting/interested)", "l": "Part 3: 4 đoạn", "r": "Part 5: 30 câu", "s": "Phỏng vấn: kể dự án", "sun": 0}, {"n": 60, "d": "2027-01-21", "w": 9, "p": 2, "g": "Đảo ngữ cơ bản + cặp liên từ (both…and, either…or)", "l": "Part 4: 4 bài", "r": "Part 7: đoạn ba", "s": "Phỏng vấn: xử lý xung đột", "sun": 0}, {"n": 61, "d": "2027-01-22", "w": 9, "p": 2, "g": "Câu so sánh nâng cao, as…as", "l": "Part 2: 25 câu", "r": "Part 6: 3 đoạn", "s": "Phỏng vấn: hỏi lại nhà tuyển dụng", "sun": 0}, {"n": 62, "d": "2027-01-23", "w": 9, "p": 2, "g": "Ôn tuần 9", "l": "Part 1-4 mini", "r": "Part 5-7 mini bấm giờ", "s": "Phỏng vấn giả lập 3 phút + ghi âm", "sun": 0}, {"n": 63, "d": "2027-01-24", "w": 9, "p": 2, "g": "Ôn tuần + kiểm tra mini", "l": "", "r": "", "s": "", "sun": 1}, {"n": 64, "d": "2027-01-25", "w": 10, "p": 3, "g": "Sổ lỗi: nhóm lỗi nhiều nhất #1", "l": "Part 3: 4 đoạn", "r": "Part 7: 3 đoạn bấm giờ", "s": "Shadowing Part 3", "sun": 0}, {"n": 65, "d": "2027-01-26", "w": 10, "p": 3, "g": "Sổ lỗi: nhóm lỗi #2", "l": "Part 4: 4 bài", "r": "Part 5: 30 câu", "s": "Shadowing Part 4", "sun": 0}, {"n": 66, "d": "2027-01-27", "w": 10, "p": 3, "g": "Ôn giới từ", "l": "Part 2: 25 câu", "r": "Part 7: 3 đoạn", "s": "Nói về mục tiêu nghề nghiệp", "sun": 0}, {"n": 67, "d": "2027-01-28", "w": 10, "p": 3, "g": "Ôn liên từ", "l": "Part 3-4: 6 đoạn", "r": "Part 6: 4 đoạn", "s": "Stand-up + bug", "sun": 0}, {"n": 68, "d": "2027-01-29", "w": 10, "p": 3, "g": "Ôn thì + bị động", "l": "Part 1-2: 30 câu", "r": "Part 7: đoạn kép", "s": "Tự giới thiệu (so với ngày 1)", "sun": 0}, {"n": 69, "d": "2027-01-30", "w": 10, "p": 3, "g": "Chuẩn bị thi thử", "l": "Part 3-4 nhẹ", "r": "Part 5: 30 câu", "s": "Ghi âm tự do 2 phút", "sun": 0}, {"n": 70, "d": "2027-01-31", "w": 10, "p": 3, "g": "**THI THỬ 3** (full đề) + chữa", "l": "", "r": "", "s": "", "sun": 1}, {"n": 71, "d": "2027-02-01", "w": 11, "p": 3, "g": "Sổ lỗi: nhóm lỗi sau thi thử 3", "l": "Part 3-4: 6 đoạn", "r": "Part 7: 3 đoạn", "s": "Shadowing", "sun": 0}, {"n": 72, "d": "2027-02-02", "w": 11, "p": 3, "g": "Ôn từ loại", "l": "Part 2: 25 câu", "r": "Part 5: 30 câu", "s": "Kể kế hoạch Tết", "sun": 0}, {"n": 73, "d": "2027-02-03", "w": 11, "p": 3, "g": "Ôn mệnh đề quan hệ", "l": "Part 3: 4 đoạn", "r": "Part 7: đoạn kép", "s": "Shadowing", "sun": 0}, {"n": 74, "d": "2027-02-04", "w": 11, "p": 3, "g": "(Tết) Bản 60 phút", "l": "Nghe BBC nhẹ", "r": "—", "s": "Shadowing 15'", "sun": 0}, {"n": 75, "d": "2027-02-05", "w": 11, "p": 3, "g": "(Tết) Bản 60 phút", "l": "Nghe BBC nhẹ", "r": "—", "s": "Shadowing 15'", "sun": 0}, {"n": 76, "d": "2027-02-06", "w": 11, "p": 3, "g": "(Tết) Bản 60 phút", "l": "Nghe BBC nhẹ", "r": "—", "s": "Kể về Tết 1 phút + ghi âm", "sun": 0}, {"n": 77, "d": "2027-02-07", "w": 11, "p": 3, "g": "(Mùng 2 Tết) Anki 20' hoặc nghỉ", "l": "", "r": "", "s": "", "sun": 1}, {"n": 78, "d": "2027-02-08", "w": 12, "p": 3, "g": "(Tết) Bản 60 phút", "l": "Nghe nhẹ", "r": "—", "s": "Shadowing 15'", "sun": 0}, {"n": 79, "d": "2027-02-09", "w": 12, "p": 3, "g": "(Tết) Bản 60 phút", "l": "Nghe nhẹ", "r": "—", "s": "Shadowing 15'", "sun": 0}, {"n": 80, "d": "2027-02-10", "w": 12, "p": 3, "g": "Sổ lỗi: lỗi lặp lại", "l": "Part 3-4: 6 đoạn", "r": "Part 7: bấm giờ 3 đoạn", "s": "Shadowing Part 4", "sun": 0}, {"n": 81, "d": "2027-02-11", "w": 12, "p": 3, "g": "Ôn Part 5 tổng hợp", "l": "Part 2: 25 câu", "r": "Part 5: 30 câu bấm giờ 10'", "s": "Stand-up", "sun": 0}, {"n": 82, "d": "2027-02-12", "w": 12, "p": 3, "g": "Chiến lược thời gian Part 7", "l": "Part 3: 6 đoạn", "r": "Part 7: 1 bộ 10 phút", "s": "Mô tả bug", "sun": 0}, {"n": 83, "d": "2027-02-13", "w": 12, "p": 3, "g": "Chuẩn bị thi thử", "l": "Part 1-2 nhẹ", "r": "Part 6: 3 đoạn", "s": "Trình bày tính năng", "sun": 0}, {"n": 84, "d": "2027-02-14", "w": 12, "p": 3, "g": "**THI THỬ 4** (full đề) + chữa", "l": "", "r": "", "s": "", "sun": 1}, {"n": 85, "d": "2027-02-15", "w": 13, "p": 3, "g": "Sổ lỗi: lỗi sau thi thử 4", "l": "Part 3-4: 6 đoạn", "r": "Part 7: 3 đoạn", "s": "Phỏng vấn giả lập", "sun": 0}, {"n": 86, "d": "2027-02-16", "w": 13, "p": 3, "g": "Ôn 50 câu Part 5 sai nhiều nhất", "l": "Part 2: 25 câu", "r": "Part 5: 30 câu", "s": "Shadowing", "sun": 0}, {"n": 87, "d": "2027-02-17", "w": 13, "p": 3, "g": "Ôn từ vựng: thẻ hay quên", "l": "Part 3-4: 6 đoạn", "r": "Part 6+7", "s": "Stand-up + bug", "sun": 0}, {"n": 88, "d": "2027-02-18", "w": 13, "p": 3, "g": "Ôn nhẹ toàn bộ", "l": "Part 1-4 mini", "r": "Part 5-7 mini", "s": "Ghi âm cuối kỳ: tự giới thiệu + công việc", "sun": 0}, {"n": 89, "d": "2027-02-19", "w": 13, "p": 3, "g": "Nghỉ nhẹ: chỉ Anki 20' + nghe 20'", "l": "—", "r": "—", "s": "—", "sun": 0}, {"n": 90, "d": "2027-02-20", "w": 13, "p": 3, "g": "**THI THỬ CUỐI (full đề, 2 giờ)** + chữa", "l": "—", "r": "—", "s": "So sánh ghi âm ngày 1 vs ngày 88", "sun": 0}];
+const START = new Date(2026,10,23);
+const MOCK_DAYS = {28:"Thi thử 1",56:"Thi thử 2",70:"Thi thử 3",84:"Thi thử 4",90:"Thi thử cuối"};
+const BLOCKS = [["vocab","Từ vựng Anki","Ôn thẻ đến hạn + 15 từ mới",30],["listen","Nghe","Nghe + chép chính tả",50],["gram","Ngữ pháp / Part 5-6","Chủ điểm trong ngày + bài tập",40],["read","Đọc","Đọc hiểu / Part 7",25],["speak","Nói + ghi âm","Shadowing + nói theo đề",25],["log","Sổ lỗi + theo dõi","Ghi lỗi, tick ngày học",10]];
+const LITE = {vocab:20,listen:25,speak:15};
+const ICON = {
+ home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
+ today:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M9 16l2 2 4-4"/></svg>',
+ cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M8 15h.01M12 15h.01M16 15h.01"/></svg>',
+ book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2z"/><path d="M4 21V5"/></svg>',
+ lib:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>',
+ chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+ sun:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"/></svg>',
+ moon:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 13A9 9 0 1111 3a7 7 0 0010 10z"/></svg>'};
+const TABS = [["tong-quan","Tổng quan",ICON.home],["hom-nay","Hôm nay",ICON.today],["lich","Lịch",ICON.cal],["hoc","Học",ICON.book],["tai-lieu","Tài liệu",ICON.lib],["diem","Điểm",ICON.chart]];
+const $ = s => document.querySelector(s);
+let store = {};
+try { store = JSON.parse(localStorage.getItem("e90") || "{}"); } catch(e){}
+store.done = store.done || {}; store.lite = store.lite || {}; store.mocks = store.mocks || [];
+const save = () => { try { localStorage.setItem("e90", JSON.stringify(store)); } catch(e){} };
+const fmt = iso => { const [y,m,d] = iso.split("-"); return d+"/"+m+"/"+y; };
+const dow = n => ["T2","T3","T4","T5","T6","T7","CN"][(n-1)%7];
+const clean = s => (s||"").replace(/\*\*/g,"");
+const esc = s => clean(s).replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const todayIndex = () => { const n = new Date(); return Math.round((new Date(n.getFullYear(),n.getMonth(),n.getDate()) - START)/86400000); };
+const blocksFor = n => store.lite[n] ? BLOCKS.filter(b => LITE[b[0]]) : BLOCKS;
+const doneCount = n => blocksFor(n).filter(b => store.done[n+":"+b[0]]).length;
+const isDone = n => doneCount(n) === blocksFor(n).length;
+let cur = Math.min(89, Math.max(0, todayIndex()));
+
+/* theme */
+function setTheme(t){ if (t) document.documentElement.setAttribute("data-theme", t); else document.documentElement.removeAttribute("data-theme");
+  const dark = t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; $("#theme").innerHTML = dark ? ICON.sun : ICON.moon; try { drawChart(); } catch(e){} }
+let theme = null; try { theme = localStorage.getItem("e90theme"); } catch(e){}
+$("#theme").addEventListener("click", () => { const dark = document.documentElement.getAttribute("data-theme") ? document.documentElement.getAttribute("data-theme") === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; theme = dark ? "light" : "dark"; try { localStorage.setItem("e90theme", theme); } catch(e){} setTheme(theme); });
+
+/* dashboard */
+function renderDash(){
+  const ti = todayIndex(); let n = 0, blocks = 0; DAYS.forEach(d => { if (isDone(d.n)) n++; blocks += doneCount(d.n); });
+  $("#ring-n").textContent = n;
+  $("#ring-fg").style.strokeDashoffset = 326.7 * (1 - n/90);
+  let streak = 0; const top = Math.min(89, ti);
+  for (let i = top; i >= 0; i--) { if (isDone(i+1)) streak++; else if (i !== top) break; }
+  const d = DAYS[cur];
+  $("#phase-tag").textContent = ["Nền tảng","Làm quen TOEIC","Luyện đề"][d.p-1] + " · Tuần " + d.w;
+  if (ti < 0) { $("#hero-title").textContent = "Còn " + (-ti) + " ngày nữa là bắt đầu"; $("#hero-sub").textContent = "Ngày 1 là thứ Hai 23/11/2026. Cài Anki và đọc bài Ngày 1 trước để vào guồng."; $("#cta").textContent = "Xem việc Ngày 1"; }
+  else if (ti > 89) { $("#hero-title").textContent = "Đã hết 90 ngày"; $("#hero-sub").textContent = "Cập nhật điểm thi thử cuối và lập kế hoạch ngày 91-180."; }
+  else { $("#hero-title").textContent = "Ngày " + (ti+1) + ": " + (isDone(ti+1) ? "đã xong" : doneCount(ti+1) + "/" + blocksFor(ti+1).length + " việc"); $("#hero-sub").textContent = esc(DAYS[ti].g); $("#cta").textContent = isDone(ti+1) ? "Xem lại hôm nay" : "Học hôm nay"; }
+  const nextMock = Object.keys(MOCK_DAYS).map(Number).find(k => k-1 >= Math.max(0,ti));
+  $("#stats").innerHTML = '<div class="hot"><small>Chuỗi ngày</small><b>' + streak + '</b></div><div><small>Ngày hoàn thành</small><b>' + n + '/90</b></div><div><small>Việc đã tick</small><b>' + blocks + '</b></div><div><small>Mục tiêu</small><b>500-550</b></div>';
+  $("#heat").innerHTML = DAYS.map(x => { const tot = blocksFor(x.n).length, c = doneCount(x.n); const l = c === 0 ? 0 : c === tot ? 3 : c/tot > .5 ? 2 : 1;
+    return '<i data-l="' + l + '" class="' + (x.n-1 === ti ? "today " : "") + (MOCK_DAYS[x.n] ? "mock" : "") + '" title="Ngày ' + x.n + ' · ' + fmt(x.d) + '"></i>'; }).join("") + '<i class="pad"></i>'.repeat(1);
+  const ph = document.querySelectorAll("#phases b"), lens = [28,35,27], st = [0,28,63];
+  ph.forEach((b,i) => { const p = Math.max(0, Math.min(1, (Math.max(0,ti+1) - st[i]) / lens[i])); b.style.width = (p*100) + "%"; });
+  const mk = nextMock ? DAYS[nextMock-1] : null;
+  $("#mock-card").innerHTML = '<b>Thi thử kế tiếp</b>' + (mk ? '<div class="stat" style="margin:8px 0 2px">' + fmt(mk.d).slice(0,5) + '</div><p class="muted" style="margin:0">' + MOCK_DAYS[nextMock] + (nextMock === 28 ? " (nửa đề)" : " (full đề)") + (ti >= 0 ? ', còn ' + Math.max(0, nextMock-1-ti) + ' ngày' : '') + '</p>' : '<p class="muted">Đã qua các mốc thi thử.</p>')
+    + (store.mocks.length ? '<p style="margin:10px 0 0">Điểm gần nhất: <b class="mono">' + (store.mocks[store.mocks.length-1].l + store.mocks[store.mocks.length-1].r) + '</b></p>' : '');
+}
+
+/* today */
+let timer = null; // {id, end, total}
+function fmtT(s){ s = Math.max(0, Math.round(s)); return String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0"); }
+function renderToday(){
+  const d = DAYS[cur], ti = todayIndex(), lite = !!store.lite[d.n];
+  const pre = $("#prestart");
+  if (ti < 0) { pre.hidden = false; pre.textContent = "Kế hoạch bắt đầu thứ Hai 23/11/2026, còn " + (-ti) + " ngày. Bạn có thể làm thử Ngày 1 từ bây giờ."; } else pre.hidden = true;
+  $("#d-tag").textContent = "Tuần " + d.w + " · " + ["Nền tảng","Làm quen TOEIC","Luyện đề"][d.p-1];
+  $("#today-title").textContent = "Ngày " + d.n + " · " + dow(d.n) + " " + fmt(d.d).slice(0,5) + (cur === ti ? " · hôm nay" : "");
+  const bl = blocksFor(d.n), c = doneCount(d.n);
+  $("#prog-label").textContent = c + " / " + bl.length + " việc";
+  $("#day-bar").style.width = (c/bl.length*100) + "%";
+  $("#lite-tag").hidden = !lite;
+  $("#tasks").innerHTML = bl.map(b => { const id = d.n+":"+b[0], ck = store.done[id] ? "checked" : "", mins = lite && LITE[b[0]] ? LITE[b[0]] : b[3];
+    const run = timer && timer.id === id; const lab = run ? fmtT((timer.end - Date.now())/1000) : mins + "'";
+    return '<div class="task ' + (ck ? "done" : "") + '"><input type="checkbox" id="c-' + b[0] + '" data-id="' + id + '" ' + ck + '><label for="c-' + b[0] + '"><b>' + b[1] + '</b><small>' + b[2] + '</small></label><button class="tm ' + (run ? "run" : "") + '" data-t="' + id + '" data-m="' + mins + '" aria-label="' + (run ? "Dừng" : "Bắt đầu đếm giờ") + ' ' + b[1] + '">' + (run ? "" : "▶ ") + lab + '</button></div>'; }).join("");
+  $("#lite").textContent = lite ? "Quay lại bản 3 giờ" : "Tính ngày này là bản 60 phút";
+  $("#today-detail").innerHTML = d.sun ? '<b>Hôm nay</b><p style="margin:8px 0 0">' + esc(d.g) + '</p>'
+    : '<b>Nội dung hôm nay</b><dl class="words" style="margin-top:10px"><dt>Ngữ pháp</dt><dd>' + esc(d.g) + '</dd><dt>Nghe</dt><dd>' + esc(d.l) + '</dd><dt>Đọc</dt><dd>' + esc(d.r) + '</dd><dt>Nói</dt><dd>' + esc(d.s) + '</dd></dl>' + (d.n === 1 ? '<p style="margin:12px 0 0"><a href="#hoc-ngay-1">Mở bài học Ngày 1 đầy đủ</a></p>' : '');
+  document.querySelectorAll("#tasks input").forEach(i => i.addEventListener("change", e => { store.done[e.target.dataset.id] = e.target.checked; save(); renderAll(); }));
+  document.querySelectorAll("#tasks .tm").forEach(b => b.addEventListener("click", () => { const id = b.dataset.t; if (timer && timer.id === id) timer = null; else timer = {id, end: Date.now() + (+b.dataset.m)*60000}; renderToday(); }));
+}
+setInterval(() => { if (!timer) return; const b = document.querySelector('[data-t="' + timer.id + '"]'); if (!b) return; const left = (timer.end - Date.now())/1000; if (left <= 0) { b.textContent = "Hết giờ, tick nhé"; timer = null; } else b.textContent = fmtT(left); }, 1000);
+$("#prev").addEventListener("click", () => { cur = Math.max(0, cur-1); timer = null; renderToday(); renderDash(); });
+$("#next").addEventListener("click", () => { cur = Math.min(89, cur+1); timer = null; renderToday(); renderDash(); });
+$("#goto-today").addEventListener("click", () => { cur = Math.min(89, Math.max(0, todayIndex())); timer = null; renderToday(); renderDash(); });
+$("#lite").addEventListener("click", () => { const n = DAYS[cur].n; store.lite[n] = !store.lite[n]; save(); renderAll(); });
+
+/* schedule */
+let wk = DAYS[cur].w;
+function renderSched(){
+  $("#weeks").innerHTML = Array.from({length:13}, (_,i) => '<button data-w="' + (i+1) + '" aria-pressed="' + (wk === i+1) + '">Tuần ' + (i+1) + '</button>').join("");
+  document.querySelectorAll("#weeks button").forEach(b => b.addEventListener("click", () => { wk = +b.dataset.w; renderSched(); }));
+  const ti = todayIndex();
+  $("#sched").innerHTML = DAYS.filter(d => d.w === wk).map(d => {
+    const cls = (d.sun ? "sun " : "") + (d.n-1 === ti ? "cur " : "") + (isDone(d.n) ? "done" : ""); const date = fmt(d.d).slice(0,5);
+    return d.sun ? '<tr class="' + cls + '"><td class="mono">' + d.n + '<br>' + date + '</td><td>CN</td><td colspan="4">' + esc(d.g) + '</td></tr>'
+      : '<tr class="' + cls + '"><td class="mono">' + d.n + '<br>' + date + '</td><td>' + dow(d.n) + '</td><td>' + esc(d.g) + '</td><td>' + esc(d.l) + '</td><td>' + esc(d.r) + '</td><td>' + esc(d.s) + '</td></tr>'; }).join("");
+}
+
+/* day-1 exercises */
+const EX = [["I ___ a developer.","am"],["She ___ my manager.","is"],["We ___ in the same team.","are"],["The bug ___ serious.","is"],["You ___ very busy today.","are"],["They ___ not at the office.","are"],["___ the report ready? (is/are/am)","is"],["It ___ not a problem.","is"]];
+function renderEx(){ $("#ex1").innerHTML = EX.map((q,i) => '<li><span>' + q[0].replace("___", '<input type="text" id="ex-' + i + '" autocomplete="off" aria-label="Câu ' + (i+1) + '">') + '</span><span id="exr-' + i + '"></span></li>').join(""); $("#ex-score").textContent = ""; }
+$("#ex-check").addEventListener("click", () => { let ok = 0;
+  EX.forEach((q,i) => { const v = $("#ex-"+i).value.trim().toLowerCase(), r = $("#exr-"+i);
+    if (v === q[1]) { ok++; r.className = "ok"; r.textContent = "đúng"; } else { r.className = "no"; r.textContent = v ? "sai, đáp án: " + q[1] : "chưa điền, đáp án: " + q[1]; } });
+  $("#ex-score").textContent = ok + " / " + EX.length; });
+$("#ex-reset").addEventListener("click", renderEx);
+
+/* mocks */
+function renderMocks(){
+  const rows = store.mocks;
+  $("#m-rows").innerHTML = rows.length ? rows.map((m,i) => '<tr><td>' + m.name.replace(/[&<>]/g,"") + '</td><td class="mono">' + m.l + '</td><td class="mono">' + m.r + '</td><td class="mono"><b>' + (m.l+m.r) + '</b></td><td><button data-del="' + i + '" aria-label="Xóa">Xóa</button></td></tr>').join("") : '<tr><td colspan="5" class="muted">Chưa có điểm. Sau lần thi thử đầu tiên, nhập điểm Nghe và Đọc ở trên.</td></tr>';
+  document.querySelectorAll("[data-del]").forEach(b => b.addEventListener("click", () => { store.mocks.splice(+b.dataset.del,1); save(); renderAll(); }));
+  drawChart();
+}
+$("#m-add").addEventListener("click", () => {
+  const l = +$("#m-l").value, r = +$("#m-r").value;
+  if (!(l >= 5 && l <= 495 && r >= 5 && r <= 495)) { $("#m-l").focus(); return; }
+  const name = $("#m-name").value; store.mocks = store.mocks.filter(m => m.name !== name).concat([{name,l,r}]);
+  const order = Array.from($("#m-name").options).map(o => o.value); order.unshift(order.pop());
+  store.mocks.sort((a,b) => order.indexOf(a.name) - order.indexOf(b.name));
+  save(); renderAll(); $("#m-l").value = ""; $("#m-r").value = "";
+});
+function drawChart(){
+  const W = 640, H = 240, L = 44, R = 16, T = 16, B = 40, ymax = 700;
+  const pts = store.mocks.map(m => ({n:m.name.replace(/ \(.*/,""), v:m.l+m.r}));
+  const y = v => T + (H-T-B) * (1 - v/ymax);
+  const x = i => pts.length < 2 ? (L + W-R)/2 : L + (W-L-R) * i/(pts.length-1);
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim(); let g = "";
+  [0,200,400,600].forEach(v => g += '<line x1="' + L + '" x2="' + (W-R) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="' + css("--line") + '"/><text x="' + (L-6) + '" y="' + (y(v)+4) + '" text-anchor="end">' + v + '</text>');
+  g += '<line x1="' + L + '" x2="' + (W-R) + '" y1="' + y(500) + '" y2="' + y(500) + '" stroke="' + css("--hot") + '" stroke-dasharray="5 4"/><text x="' + (W-R) + '" y="' + (y(500)-5) + '" text-anchor="end" style="fill:' + css("--hot") + '">mục tiêu 500</text>';
+  if (pts.length) { g += '<polyline fill="none" stroke="' + css("--accent") + '" stroke-width="2.5" points="' + pts.map((p,i) => x(i)+","+y(p.v)).join(" ") + '"/>';
+    pts.forEach((p,i) => { g += '<circle cx="' + x(i) + '" cy="' + y(p.v) + '" r="4.5" fill="' + css("--accent") + '"/><text x="' + x(i) + '" y="' + (y(p.v)-10) + '" text-anchor="middle" style="fill:' + css("--fg") + '">' + p.v + '</text><text x="' + x(i) + '" y="' + (H-16) + '" text-anchor="middle">' + p.n + '</text>'; });
+  } else g += '<text x="' + (W/2) + '" y="' + (H/2) + '" text-anchor="middle">Chưa có điểm để vẽ</text>';
+  $("#chart").innerHTML = g;
+}
+
+/* routing */
+$("#nav").innerHTML = TABS.map(t => '<a href="#' + t[0] + '" data-v="' + t[0] + '">' + t[2] + '<span>' + t[1] + '</span></a>').join("");
+const PANELS = ["ngay-1","chien-luoc","ngu-phap","noi-tu-vung","toeic"];
+function route(){
+  const h = (location.hash || "").slice(1); let v = "tong-quan", p = "ngay-1";
+  if (h.startsWith("hoc")) { v = "hoc"; const s = h.replace(/^hoc-?/, ""); if (PANELS.includes(s)) p = s; }
+  else if (TABS.some(t => t[0] === h)) v = h;
+  document.querySelectorAll(".view").forEach(s => s.classList.toggle("on", s.id === "v-" + v));
+  document.querySelectorAll("#nav a").forEach(a => a.dataset.v === v ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current"));
+  document.querySelectorAll(".panel").forEach(s => s.hidden = s.id !== "p-" + p);
+  document.querySelectorAll("#hoc-tabs a").forEach(a => a.getAttribute("href") === "#hoc-" + p ? a.setAttribute("aria-current","page") : a.removeAttribute("aria-current"));
+  if (v === "diem") drawChart();
+  scrollTo(0,0);
+}
+addEventListener("hashchange", route);
+function renderAll(){ renderDash(); renderToday(); renderSched(); renderMocks(); }
+renderEx(); setTheme(theme); renderAll(); route();
+</script>
