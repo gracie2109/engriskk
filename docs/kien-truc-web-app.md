@@ -73,3 +73,17 @@ Lý do chính [Suy luận]:
 - expo-notifications: https://docs.expo.dev/versions/latest/sdk/notifications
 - Bảng giá EAS: https://expo.dev/pricing
 - Giới hạn Supabase free (trang tổng hợp bên thứ ba, nên đối chiếu supabase.com/pricing): https://automationatlas.io/answers/supabase-free-tier-limits-2026/
+
+## Cập nhật 20/11: grace định publish cho mọi người dùng chung
+
+Khuyến nghị **vẫn giữ Expo + Supabase**, nhưng bổ sung các điểm sau [Suy luận, trừ chỗ ghi Nguồn]:
+
+- **Repo dựng monorepo ngay từ đầu** (`apps/mobile`, `packages/core`), để khi người dùng web đông thì thêm `apps/web` bằng Next.js mà không phải dời code.
+- **SEO**: chỉ trang giới thiệu và vài trang bài học mẫu cần SEO. Expo Router làm được bằng render tĩnh (SSG) [Nguồn]. Nếu sau này muốn nhiều trang bài học công khai lên Google thì mới thêm Next.js.
+- **Ghi âm để trên máy người dùng**, không tải lên Supabase. Storage free chỉ 1 GB [Nguồn], nhiều người dùng sẽ hết rất nhanh.
+- **Email đăng nhập**: email mặc định của Supabase bị giới hạn số lượng gửi, chỉ hợp để thử. Khi mở cho mọi người nên nối SMTP riêng (vd. Resend có gói miễn phí).
+- **Lên store**: Apple Developer 99 USD/năm, Google Play 25 USD trả một lần. Cả hai đều cần trang chính sách quyền riêng tư, và Apple bắt buộc có nút xoá tài khoản trong app. Chưa muốn tốn tiền thì phát hành web trước, Android sau.
+- **Nội dung**: khi công khai thì mọi câu hỏi và audio phải tự soạn hoặc có giấy phép, không dùng đề ETS hay nội dung của trang khác.
+- **Chi phí**: free tier vẫn đủ cho vài trăm đến vài nghìn người dùng (Supabase 50.000 MAU, 500 MB DB). Khi có người dùng thật thì project sẽ không bị tạm dừng vì không hoạt động.
+
+Thứ tự phát hành đề xuất: (1) web trên Vercel, (2) Android trên Google Play, (3) iOS khi đã có người dùng ổn định.
